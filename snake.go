@@ -10,9 +10,15 @@ const (
 )
 
 type Snake struct {
-	d Direction
+	d         Direction
+	SnakeHead *Link
+	size      int
+}
+
+type Link struct {
 	x int
 	y int
+	l *Link
 }
 
 func (s *Snake) EatFood() {
@@ -20,26 +26,27 @@ func (s *Snake) EatFood() {
 }
 
 func (s *Snake) UpdatePosition() {
+	//move snake
 	switch s.d {
 	case UP:
-		s.y -= 1
+		s.SnakeHead.y -= 1
 	case DOWN:
-		s.y += 1
+		s.SnakeHead.y += 1
 	case LEFT:
-		s.x -= 1
+		s.SnakeHead.x -= 1
 	case RIGHT:
-		s.x += 1
+		s.SnakeHead.x += 1
 	}
 
-	if s.x >= 64 {
-		s.x = 63
-	} else if s.x < 0 {
-		s.x = 0
+	//adjust if out of bounds
+	if s.SnakeHead.x >= 64 {
+		s.SnakeHead.x = 63
+	} else if s.SnakeHead.x < 0 {
+		s.SnakeHead.x = 0
 	}
-
-	if s.y >= 64 {
-		s.y = 63
-	} else if s.y < 0 {
-		s.y = 0
+	if s.SnakeHead.y >= 64 {
+		s.SnakeHead.y = 63
+	} else if s.SnakeHead.y < 0 {
+		s.SnakeHead.y = 0
 	}
 }

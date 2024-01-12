@@ -37,9 +37,12 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 func main() {
 	snake = Snake{
 		d: RIGHT,
-		x: 32,
-		y: 32,
+		SnakeHead: &Link{
+			x: 32,
+			y: 32,
+		},
 	}
+	snake.size = 1
 	gameBoard = GameBoard{}
 	for i := 0; i < 64; i++ {
 		for j := 0; j < 64; j++ {

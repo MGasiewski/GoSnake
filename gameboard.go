@@ -21,14 +21,17 @@ var blue = color.RGBA{0, 0, 255, 255}
 
 type GameBoard struct {
 	Cells [64][64]int
+	foodX int
+	foodY int
+	snake *Snake
 }
 
 func (gb *GameBoard) DrawGameboard(screen *ebiten.Image) {
 	for i := 0; i < 64; i++ {
 		for j := 0; j < 64; j++ {
-			if gameBoard.Cells[i][j] == 1 {
+			if gb.Cells[i][j] == 1 {
 				vector.DrawFilledRect(screen, float32(i*10), float32(j*10), 10, 10, green, false)
-			} else if gameBoard.Cells[i][j] == 2 {
+			} else if gb.Cells[i][j] == 2 {
 				vector.DrawFilledRect(screen, float32(i*10), float32(j*10), 10, 10, white, false)
 			}
 		}
@@ -36,12 +39,33 @@ func (gb *GameBoard) DrawGameboard(screen *ebiten.Image) {
 }
 
 func (gb *GameBoard) UpdateGameBoard(s *Snake) {
-	gameBoard.Cells[s.x][s.y] = SNAKE_SEGMENT
+	for i := 0; i < 64; i++ {
+		for j := 0; j < 64; j++ {
+			gb.Cells[i][j] = 0
+		}
+	}
+	segmentPtr := s.SnakeHead
+	for segmentPtr != nil {
+		gb.Cells[segmentPtr.x][segmentPtr.y] = SNAKE_SEGMENT
+		segmentPtr = segmentPtr.l
+	}
+	gb.Cells[gb.foodX][gb.foodY] = FOOD
+}
+
+func (gb *GameBoard) CheckCollision(s *Snake) {
+	if s.SnakeHead.x == gb.foodX && s.SnakeHead.y == gb.foodY {
+		s.EatFood()
+	}
 }
 
 func (gb *GameBoard) InitializeGameBoard(s *Snake) {
-	gameBoard.Cells[s.x][s.y] = SNAKE_SEGMENT
-	foodX := rand.Intn(64)
-	foodY := rand.Intn(64)
-	gameBoard.Cells[foodX][foodY] = FOOD
+	gb.Cells[s.SnakeHead.x][s.SnakeHead.y] = SNAKE_SEGMENT
+	gameBoard.GenerateFood()
+	gb.Cells[gb.foodX][gb.foodY] = FOOD
+}
+
+func (gb *GameBoard) GenerateFood() {
+	gb.Cells[gb.foodX][gb.foodY] = 0
+	gb.foodX = rand.Intn(64)
+	gb.foodY = rand.Intn(64)
 }
