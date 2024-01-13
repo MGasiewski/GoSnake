@@ -4,12 +4,14 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Game struct{}
 
 var snake Snake
 var gameBoard GameBoard
+var gameOver bool
 
 func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
@@ -21,21 +23,26 @@ func (g *Game) Update() error {
 	} else if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
 		snake.d = RIGHT
 	}
-	ateFood := snake.UpdatePositionAndEatFood(gameBoard.foodX, gameBoard.foodY)
-	if ateFood {
-		gameBoard.GenerateFood()
-	}
-	lostGame := gameBoard.CheckCollision(&snake)
-	if lostGame {
-
-	} else {
-		gameBoard.UpdateGameBoard(&snake)
+	if !gameOver {
+		ateFood := snake.UpdatePositionAndEatFood(gameBoard.foodX, gameBoard.foodY)
+		if ateFood {
+			gameBoard.GenerateFood()
+		}
+		gameOver = gameBoard.CheckCollision(&snake)
+		if !gameOver {
+			gameBoard.UpdateGameBoard(&snake)
+		}
 	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	gameBoard.DrawGameboard(screen)
+	if gameOver {
+		ebitenutil.DebugPrint(screen, "GAME OVER. Please Restart")
+	} else {
+		gameBoard.DrawGameboard(screen)
+	}
+
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
