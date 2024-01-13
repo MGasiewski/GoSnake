@@ -52,10 +52,21 @@ func (gb *GameBoard) UpdateGameBoard(s *Snake) {
 	gb.Cells[gb.foodX][gb.foodY] = FOOD
 }
 
-func (gb *GameBoard) CheckCollision(s *Snake) {
-	if s.SnakeHead.x == gb.foodX && s.SnakeHead.y == gb.foodY {
-		s.EatFood()
+func (gb *GameBoard) CheckCollision(s *Snake) bool {
+	snakeLink := s.SnakeHead.l
+	for snakeLink != nil {
+		if snakeLink.x == s.SnakeHead.x && snakeLink.y == s.SnakeHead.y {
+			return true
+		}
+		snakeLink = snakeLink.l
 	}
+	if s.SnakeHead.x >= 64 || s.SnakeHead.x < 0 {
+		return true
+	}
+	if s.SnakeHead.y >= 64 || s.SnakeHead.y < 0 {
+		return true
+	}
+	return false
 }
 
 func (gb *GameBoard) InitializeGameBoard(s *Snake) {

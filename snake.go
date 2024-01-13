@@ -21,32 +21,35 @@ type Link struct {
 	l *Link
 }
 
-func (s *Snake) EatFood() {
-
-}
-
-func (s *Snake) UpdatePosition() {
-	//move snake
+func (s *Snake) UpdatePositionAndEatFood(foodX, foodY int) bool {
+	newLink := Link{
+		x: s.SnakeHead.x,
+		y: s.SnakeHead.y,
+	}
 	switch s.d {
 	case UP:
-		s.SnakeHead.y -= 1
+		newLink.y -= 1
 	case DOWN:
-		s.SnakeHead.y += 1
+		newLink.y += 1
 	case LEFT:
-		s.SnakeHead.x -= 1
+		newLink.x -= 1
 	case RIGHT:
-		s.SnakeHead.x += 1
+		newLink.x += 1
 	}
-
-	//adjust if out of bounds
-	if s.SnakeHead.x >= 64 {
-		s.SnakeHead.x = 63
-	} else if s.SnakeHead.x < 0 {
-		s.SnakeHead.x = 0
-	}
-	if s.SnakeHead.y >= 64 {
-		s.SnakeHead.y = 63
-	} else if s.SnakeHead.y < 0 {
-		s.SnakeHead.y = 0
+	prevHead := s.SnakeHead
+	s.SnakeHead = &newLink
+	s.SnakeHead.l = prevHead
+	if s.SnakeHead.x == foodX && s.SnakeHead.y == foodY {
+		return true
+	} else {
+		snakePtrPtr := &s.SnakeHead.l
+		for *snakePtrPtr != nil {
+			if (*snakePtrPtr).l != nil {
+				snakePtrPtr = &(*snakePtrPtr).l
+			} else {
+				*snakePtrPtr = nil
+			}
+		}
+		return false
 	}
 }
