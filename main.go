@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -11,8 +12,11 @@ type Game struct{}
 
 var snake Snake
 var gameBoard GameBoard
+var leaderBoard LeaderBoard
 var gameOver bool
 var score int
+var playerName string
+var nameEntered bool
 
 func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) && !(snake.d == DOWN) {
@@ -35,16 +39,22 @@ func (g *Game) Update() error {
 			gameBoard.UpdateGameBoard(&snake)
 		}
 	}
-	if gameOver && ebiten.IsKeyPressed((ebiten.KeySpace)) {
-		initializeGame()
+	if gameOver && !nameEntered {
+		AcceptInput()
 	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	if gameOver {
-		ebitenutil.DebugPrint(screen, "GAME OVER. Press the spacebar to restart")
+		ebitenutil.DebugPrint(screen, "GAME OVER. Press the spacebar to restart\n"+
+			"Final Score: "+strconv.Itoa(score)+"\n"+
+			"Enter your Name and press Enter: ")
+		ebitenutil.DebugPrintAt(screen, playerName, 200, 33)
+	} else if nameEntered {
+		leaderBoard.DrawLeaderBoard(screen)
 	} else {
+		ebitenutil.DebugPrint(screen, "Score: "+strconv.Itoa(score))
 		gameBoard.DrawGameboard(screen)
 	}
 
@@ -52,6 +62,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return 640, 640
+}
+
+func AcceptInput() {
+	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		leaderBoard.AddToLeaderBoard(&Score{
+			Name:  playerName,
+			Value: score,
+		})
+		playerName = ""
+		score = 0
+		nameEntered = true
+	} else {
+		if ebiten.IsKeyPressed(ebiten.KeyBackspace) && len(playerName) > 0 {
+			playerName = playerName[:len(playerName)-1]
+		}
+		runeSlice := ebiten.AppendInputChars([]rune(""))
+		playerName += string(runeSlice)
+	}
 }
 
 func main() {
@@ -73,9 +101,12 @@ func initializeGame() {
 		},
 	}
 	gameOver = false
+	nameEntered = false
 	score = 0
 	snake.size = 1
 	gameBoard = GameBoard{}
+	leaderBoard = LeaderBoard{}
+	leaderBoard.Number = 0
 	for i := 0; i < 64; i++ {
 		for j := 0; j < 64; j++ {
 			gameBoard.Cells[i][j] = 0
