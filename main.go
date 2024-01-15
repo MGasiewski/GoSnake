@@ -32,7 +32,7 @@ func (g *Game) Update() error {
 		ateFood := snake.UpdatePositionAndEatFood(gameBoard.foodX, gameBoard.foodY)
 		if ateFood {
 			gameBoard.GenerateFood()
-			score += 1
+			score += 100
 		}
 		gameOver = gameBoard.CheckCollision(&snake)
 		if !gameOver {
@@ -41,12 +41,14 @@ func (g *Game) Update() error {
 	}
 	if gameOver && !nameEntered {
 		AcceptInput()
+	} else if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+		initializeGame()
 	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	if gameOver {
+	if gameOver && !nameEntered {
 		ebitenutil.DebugPrint(screen, "GAME OVER. Press the spacebar to restart\n"+
 			"Final Score: "+strconv.Itoa(score)+"\n"+
 			"Enter your Name and press Enter: ")
@@ -66,7 +68,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func AcceptInput() {
 	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
-		leaderBoard.AddToLeaderBoard(&Score{
+		leaderBoard.AddToLeaderBoard(Score{
 			Name:  playerName,
 			Value: score,
 		})
@@ -85,6 +87,8 @@ func AcceptInput() {
 func main() {
 	ebiten.SetTPS(15)
 	initializeGame()
+	leaderBoard = LeaderBoard{}
+	leaderBoard.Number = 0
 	ebiten.SetWindowSize(640, 640)
 	ebiten.SetWindowTitle("Snakey snake")
 	if err := ebiten.RunGame(&Game{}); err != nil {
@@ -105,8 +109,6 @@ func initializeGame() {
 	score = 0
 	snake.size = 1
 	gameBoard = GameBoard{}
-	leaderBoard = LeaderBoard{}
-	leaderBoard.Number = 0
 	for i := 0; i < 64; i++ {
 		for j := 0; j < 64; j++ {
 			gameBoard.Cells[i][j] = 0
