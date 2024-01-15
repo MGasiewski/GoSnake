@@ -89,6 +89,7 @@ func main() {
 	initializeGame()
 	leaderBoard = LeaderBoard{}
 	leaderBoard.Number = 0
+	leaderBoard.ReadLeaderBoardFile()
 	ebiten.SetWindowSize(640, 640)
 	ebiten.SetWindowTitle("Snakey snake")
 	if err := ebiten.RunGame(&Game{}); err != nil {
